@@ -28,3 +28,10 @@ Write this app in a way that is true to your engineering style, we want to get t
 - Todo grid tiles are colored randomly with text remaining legibile
 - Create and optimize an application build for deployment as a static web app
 - Write an e2e test
+
+# Getting Started
+
+Install dependencies using
+`yarn` or `npm i`
+
+Run application backend `npm start`

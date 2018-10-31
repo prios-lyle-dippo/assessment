@@ -6,7 +6,8 @@ const mockAuthor = (n: number) => {
   const result = {
     name: `${faker.name.firstName()} ${faker.name.lastName()}`,
     jobTitle: `${faker.name.jobTitle()}`,
-    id: faker.random.uuid()
+    id: faker.random.uuid(),
+    todos: []
   };
 
   authorCRUD.create(result);

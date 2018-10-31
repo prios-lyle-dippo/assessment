@@ -5,6 +5,16 @@ import { Socket } from "socket.io";
 const db = new Loki("./db.json");
 export const authorCollection = db.addCollection("authors");
 export const todosCollection = db.addCollection("todos");
+todosCollection.on("insert", data => {
+  const authorId = data.author;
+  authorCollection.updateWhere(
+    author => author.id === authorId,
+    author => ({
+      ...author,
+      todos: author.todos.concat(data.id)
+    })
+  );
+});
 
 interface CrudMethods<T> {
   create(item: T): Response;
@@ -74,6 +84,7 @@ const configureMutexSocket = <T>(
   collection.on("insert", ev => socket.send({ [name]: ev }));
   socket.on(`create-${name}`, ev => crudMethods.create(ev));
   socket.on(`update-${name}`, ev => crudMethods.update(ev.id, ev));
+  socket.on(`delete-${name}`, ev => crudMethods.delete(ev));
 };
 
 export const todoRouter = express.Router();
