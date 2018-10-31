@@ -1,6 +1,8 @@
 import express, { Router } from "express";
 import Loki, { Collection } from "lokijs";
 import { Socket } from "socket.io";
+import { todoDecoder, authorDecoder } from "./models";
+import { Decoder } from "@mojotech/json-type-validation";
 
 const db = new Loki("./db.json");
 export const authorCollection = db.addCollection("authors");
@@ -17,27 +19,38 @@ todosCollection.on("insert", data => {
 });
 
 interface CrudMethods<T> {
-  create(item: T): Response;
-  update(id: string, data: Partial<T>): Response;
-  delete(id: string): Response;
+  create(item: T): { message: string; data?: any; error?: any };
+  update(
+    id: string,
+    data: Partial<T>
+  ): { message: string; data?: any; error?: any };
+  delete(id: string): { message: string; data?: any; error?: any };
 }
-type GenerateCrud = <T>(collection: Collection) => CrudMethods<T>;
-const generateCRUD: GenerateCrud = collection => ({
+type GenerateCrud = <T>(
+  collection: Collection,
+  decoder: Decoder<T>
+) => CrudMethods<T>;
+const generateCRUD: GenerateCrud = (collection, decoder) => ({
   create: item => {
-    try {
-      collection.insertOne(item);
-      return { message: "Created successfully" };
-    } catch (e) {
-      return e;
+    console.log("LOKO", item);
+    const result = decoder.run(item);
+    if (result.ok) {
+      collection.insertOne(result);
+      return { message: "Created successfully", data: result };
+    } else {
+      return { message: "Could not create", error: result.error };
     }
   },
   update: (id, data) => {
+    const result = decoder.runWithException(data);
+    console.log(result);
     try {
-      collection.updateWhere(
-        data => data.id === id,
-        found => Object.assign({}, found, data)
-      );
-      return { message: "Updated Successfully", data: data };
+      result &&
+        collection.updateWhere(
+          data => data.id === id,
+          found => Object.assign({}, found, result)
+        );
+      return { message: "Updated Successfully", data: result };
     } catch (e) {
       return e;
     }
@@ -52,8 +65,8 @@ const generateCRUD: GenerateCrud = collection => ({
   }
 });
 
-export const todoCRUD = generateCRUD(todosCollection);
-export const authorCRUD = generateCRUD(authorCollection);
+export const todoCRUD = generateCRUD(todosCollection, todoDecoder);
+export const authorCRUD = generateCRUD(authorCollection, authorDecoder);
 
 type ConfigureRouter = <T>(
   router: Router,
@@ -70,7 +83,9 @@ const configureRouter: ConfigureRouter = (router, collection, crudMethods) => {
   router.post("/update/:id", (req, res) =>
     res.json(crudMethods.update(req.params.id, req.body))
   );
-  router.post("/create", (req, res) => res.json(crudMethods.create(req.body)));
+  router.post("/create", (req, res) => {
+    res.json(crudMethods.create(req.body));
+  });
   router.post("/delete/:id", (req, res) =>
     res.json(crudMethods.delete(req.params.id))
   );
