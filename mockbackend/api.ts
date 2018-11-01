@@ -32,27 +32,24 @@ type GenerateCrud = <T>(
 ) => CrudMethods<T>;
 const generateCRUD: GenerateCrud = (collection, decoder) => ({
   create: item => {
-    console.log("LOKO", item);
     const result = decoder.run(item);
     if (result.ok) {
       collection.insertOne(result);
-      return { message: "Created successfully", data: result };
+      return { message: "Created successfully", data: result.result };
     } else {
       return { message: "Could not create", error: result.error };
     }
   },
   update: (id, data) => {
-    const result = decoder.runWithException(data);
-    console.log(result);
-    try {
-      result &&
-        collection.updateWhere(
-          data => data.id === id,
-          found => Object.assign({}, found, result)
-        );
-      return { message: "Updated Successfully", data: result };
-    } catch (e) {
-      return e;
+    const result = decoder.run(data);
+    if (result.ok) {
+      collection.updateWhere(
+        data => data.id === id,
+        found => Object.assign({}, found, result)
+      );
+      return { message: "Updated Successfully", data: result.result };
+    } else {
+      return { message: "Could not update", error: result.error };
     }
   },
   delete: id => {
@@ -60,7 +57,7 @@ const generateCRUD: GenerateCrud = (collection, decoder) => ({
       collection.removeWhere(data => data.id === id);
       return { message: "Deleted Successfully" };
     } catch (e) {
-      return e;
+      return { message: "Could not delete", error: e };
     }
   }
 });
