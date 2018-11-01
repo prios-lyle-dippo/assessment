@@ -14,7 +14,12 @@ export interface Todo {
   completed?: boolean;
 }
 
-export const todoDecoder: Decoder<Todo> = object({
+export const todoCreateDecoder: Decoder<Partial<Todo>> = object({
+  title: string(),
+  author: string(),
+  completed: optional(boolean())
+});
+export const todoUpdateDecoder: Decoder<Todo> = object({
   id: string(),
   title: string(),
   author: string(),
@@ -28,7 +33,13 @@ export interface Author {
   todos?: string[];
 }
 
-export const authorDecoder: Decoder<Author> = object({
+export const authorCreateDecoder: Decoder<Partial<Author>> = object({
+  name: string(),
+  jobTitler: optional(string()),
+  todos: optional(array(string()))
+});
+
+export const authorUpdateDecoder: Decoder<Author> = object({
   id: string(),
   name: string(),
   jobTitler: optional(string()),

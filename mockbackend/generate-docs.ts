@@ -10,9 +10,7 @@ type Method = "GET" | "POST" | "DELETE" | "PUT";
 type URLParams = Array<{ [key: string]: string }>;
 type RequiredParams<T> = Array<keyof T>;
 type OptionalParams<T> = Array<keyof T>;
-interface DataParams {
-  [key: string]: string;
-}
+type DataParams<T> = { [K in keyof T]: string };
 interface SuccessResponse extends HeaderWithDesc {
   statusCode: number;
   response: any;
@@ -21,12 +19,12 @@ interface ErrorResposne extends HeaderWithDesc {
   statusCode: number;
   response: any;
 }
-interface TemplateParams<D> {
+export interface TemplateParams<D> {
   title: Title;
   url: string;
   method: Method;
   urlParams?: URLParams;
-  dataParams?: D;
+  dataParams?: DataParams<D>;
   requiredParams?: RequiredParams<D>;
   optionalParams?: OptionalParams<D>;
   successResponse: SuccessResponse;
@@ -78,14 +76,20 @@ const template = <D>({
   ${successResponse.description}
 
   * **Code:** ${successResponse.statusCode} <br />
-    **Content:** \`${JSON.stringify(successResponse.response, null, 4)}\`
+    **Content:**
+    \`\`\`js
+    ${JSON.stringify(successResponse.response, null, 4)}
+    \`\`\`
  
 * **Error Response:**
 
   ${errorResponse.description}
 
   * **Code:** ${errorResponse.statusCode} <br />
-    **Content:** \`${JSON.stringify(errorResponse.response, null, 4)}\`
+    **Content:** 
+    \`\`\`js
+    ${JSON.stringify(errorResponse.response, null, 4)}
+    \`\`\`
 `;
 
 export type CreateDocsParams = Array<TemplateParams<any>>;

@@ -1,7 +1,12 @@
 import express, { Router } from "express";
 import Loki, { Collection } from "lokijs";
 import { Socket } from "socket.io";
-import { todoDecoder, authorDecoder } from "./models";
+import {
+  todoCreateDecoder,
+  todoUpdateDecoder,
+  authorCreateDecoder,
+  authorUpdateDecoder
+} from "./models";
 import { Decoder } from "@mojotech/json-type-validation";
 
 const db = new Loki("./db.json");
@@ -28,11 +33,16 @@ interface CrudMethods<T> {
 }
 type GenerateCrud = <T>(
   collection: Collection,
-  decoder: Decoder<T>
+  createDecoder: Decoder<Partial<T>>,
+  updateDecoder: Decoder<T>
 ) => CrudMethods<T>;
-const generateCRUD: GenerateCrud = (collection, decoder) => ({
+const generateCRUD: GenerateCrud = (
+  collection,
+  createDecoder,
+  updateDecoder
+) => ({
   create: item => {
-    const result = decoder.run(item);
+    const result = createDecoder.run(item);
     if (result.ok) {
       collection.insertOne(result);
       return { message: "Created successfully", data: result.result };
@@ -41,7 +51,7 @@ const generateCRUD: GenerateCrud = (collection, decoder) => ({
     }
   },
   update: (id, data) => {
-    const result = decoder.run(data);
+    const result = updateDecoder.run(data);
     if (result.ok) {
       collection.updateWhere(
         data => data.id === id,
@@ -62,8 +72,16 @@ const generateCRUD: GenerateCrud = (collection, decoder) => ({
   }
 });
 
-export const todoCRUD = generateCRUD(todosCollection, todoDecoder);
-export const authorCRUD = generateCRUD(authorCollection, authorDecoder);
+export const todoCRUD = generateCRUD(
+  todosCollection,
+  todoCreateDecoder,
+  todoUpdateDecoder
+);
+export const authorCRUD = generateCRUD(
+  authorCollection,
+  authorCreateDecoder,
+  authorUpdateDecoder
+);
 
 type ConfigureRouter = <T>(
   router: Router,

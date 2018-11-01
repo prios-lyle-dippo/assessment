@@ -1,4 +1,4 @@
-import { CreateDocsParams } from "./generate-docs";
+import { CreateDocsParams, TemplateParams } from "./generate-docs";
 import { Author, Todo } from "./models";
 
 type TodoParamsType = { [K in keyof Todo]: string };
@@ -18,26 +18,80 @@ class AuthorParams implements AuthorParamsType {
   name = "string";
   todos = "Array<string>";
 }
-export const docParams: CreateDocsParams = [
-  {
-    dataParams: new TodoParams(),
-    errorResponse: {
-      description: "an err response",
-      response: "response goes here",
-      statusCode: 500
+
+const createTodo: TemplateParams<Todo> = {
+  dataParams: new TodoParams(),
+  errorResponse: {
+    description: "an err response",
+    response: {
+      message: "Could not create",
+      error: {
+        kind: "DecoderError",
+        input: {
+          title: "Take out the trash"
+        },
+        at: "input",
+        message: "the key 'author' is required but was not present"
+      }
     },
-    method: "POST",
-    requiredParams: requiredTodoParams,
-    optionalParams: optionalTodoParams,
-    successResponse: {
-      description: "success",
-      response: "success",
-      statusCode: 200
+    statusCode: 500
+  },
+  method: "POST",
+  requiredParams: requiredTodoParams,
+  optionalParams: optionalTodoParams,
+  successResponse: {
+    description: "success",
+    response: {
+      message: "Created successfully",
+      data: {
+        title: "Take out the trash",
+        author: "0000-0000-0000-0001"
+      }
     },
-    title: {
-      header: "Create a todo",
-      description: "This method creates a todo in our backend"
+    statusCode: 200
+  },
+  title: {
+    header: "Create a todo",
+    description: "This method creates a todo in our backend"
+  },
+  url: "/todos/create"
+};
+
+const updateTodo: TemplateParams<Todo> = {
+  dataParams: new TodoParams(),
+  errorResponse: {
+    description: "an err response",
+    response: {
+      message: "Could not create",
+      error: {
+        kind: "DecoderError",
+        input: {
+          title: "Take out the trash"
+        },
+        at: "input",
+        message: "the key 'author' is required but was not present"
+      }
     },
-    url: "/todos/create"
-  }
-];
+    statusCode: 500
+  },
+  method: "POST",
+  requiredParams: requiredTodoParams,
+  optionalParams: optionalTodoParams,
+  successResponse: {
+    description: "success",
+    response: {
+      message: "Created successfully",
+      data: {
+        title: "Take out the trash",
+        author: "0000-0000-0000-0001"
+      }
+    },
+    statusCode: 200
+  },
+  title: {
+    header: "Update a todo",
+    description: "This method creates a todo in our backend"
+  },
+  url: "/todos/update/0000-0000-0000-0001"
+};
+export const docParams: CreateDocsParams = [createTodo];
