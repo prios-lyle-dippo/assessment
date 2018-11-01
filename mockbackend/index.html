@@ -20,7 +20,7 @@
             main.appendChild(newEl);
         }
     });
-    socket.emit('create', { x: 'y' });
+    socket.emit('create-todo', { id: "test", title: 'y', author: "123", completed: false });
     var btn = document.createElement("BUTTON");        // Create a <button> element
     var t = document.createTextNode("CLICK ME");       // Create a text node
     btn.onclick = () => socket.emit('create', { title: 'xyz', author: null, id: 'test' })
@@ -28,7 +28,7 @@
     document.body.appendChild(btn);
     var btn2 = document.createElement("BUTTON");        // Create a <button> element
     var t2 = document.createTextNode("CLICK ME");       // Create a text node
-    btn2.onclick = () => socket.emit('update', { title: 'new thang', id: 'test' })
+    btn2.onclick = () => socket.emit('update', { title: 'new thang', id: 'test', completed: true })
     btn2.appendChild(t2);                                // Append the text to <button>
     document.body.appendChild(btn2);
 

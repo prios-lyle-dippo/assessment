@@ -104,7 +104,7 @@ const createDocs = (params: CreateDocsParams) => {
     (acc, cur) => acc.concat("\n\n" + cur),
     ""
   );
-  fs.writeFileSync("./test.md", aggregateDocs, { encoding: "utf-8" });
+  fs.writeFileSync("./RESTAPI.md", aggregateDocs, { encoding: "utf-8" });
 };
 
 createDocs(docParams);
