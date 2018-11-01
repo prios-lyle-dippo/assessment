@@ -21,7 +21,8 @@
     "uws": "^99.0.0"
   },
   "scripts": {
-    "start": "ts-node mockbackend/server.ts"
+    "start": "ts-node mockbackend/server.ts",
+    "generateDocs": "ts-node mockbackend/generate-docs"
   },
   "dependencies": {
     "socket.io": "^2.1.1"

@@ -1,77 +1,101 @@
-
+import fs from "fs";
+import { docParams } from "./docparams";
 interface HeaderWithDesc {
-    header: string;
-    description: string;
+  header?: string;
+  description?: string;
 }
 
 interface Title extends HeaderWithDesc {}
-interface URL extends HeaderWithDesc {}
-interface Method extends HeaderWithDesc {
-    method: 'GET' | 'POST' | 'DELETE' | 'PUT';
-}
-interface URLParams extends HeaderWithDesc {}
-type RequiredParams<T> = Partial<T>;
-type OptionalParams<T> = Partial<T>;
+type Method = "GET" | "POST" | "DELETE" | "PUT";
+type URLParams = Array<{ [key: string]: string }>;
+type RequiredParams<T> = Array<keyof T>;
+type OptionalParams<T> = Array<keyof T>;
 interface DataParams {
-    [key: string]: any
+  [key: string]: string;
 }
-interface SuccessResponse extends HeaderWithDesc {}
-interface ErrorResposne extends HeaderWithDesc {}
-const template = <D>(title: Title, url: URL, method: Method, urlParams: URLParams, dataParams: D, requiredParams: RequiredParams<D>, optionalParams: OptionalParams<D>, successResponse: SuccessResponse, errorResponse: ErrorResposne) => `
-**Title**
+interface SuccessResponse extends HeaderWithDesc {
+  statusCode: number;
+  response: any;
+}
+interface ErrorResposne extends HeaderWithDesc {
+  statusCode: number;
+  response: any;
+}
+interface TemplateParams<D> {
+  title: Title;
+  url: string;
+  method: Method;
+  urlParams?: URLParams;
+  dataParams?: D;
+  requiredParams?: RequiredParams<D>;
+  optionalParams?: OptionalParams<D>;
+  successResponse: SuccessResponse;
+  errorResponse: ErrorResposne;
+}
+const template = <D>({
+  dataParams,
+  method,
+  errorResponse,
+  optionalParams,
+  requiredParams,
+  successResponse,
+  title,
+  url,
+  urlParams
+}: TemplateParams<D>) => `
+**${title.header}**
 ----
-  <_Additional information about your API call. Try to use verbs that match both request type (fetching vs modifying) and plurality (one vs multiple)._>
+  ${title.description}
 
 * **URL**
 
-  ${url.description}
+  ${url}
 
-* **${method.header}:**
+* **METHOD:**
   
-  ${method.description}
-
-  ${method.method}
+  ${method}
   
 *  **URL Params**
 
-   <_If URL params exist, specify them in accordance with name mentioned in URL section. Separate into optional and required. Document data constraints._> 
-
-   **Required:**
- 
-   `id=[integer]`
-
-   **Optional:**
- 
-   `photo_id=[alphanumeric]`
+   ${urlParams ? urlParams.map(p => `+ ${p}`) : "None"}
 
 * **Data Params**
 
-  <_If making a post request, what should the body payload look like? URL Params rules apply here too._>
+   \`${JSON.stringify(dataParams, null, 4)}\`
+
+   **Required:**
+ 
+  ${requiredParams ? requiredParams.map(p => `+ ${p}`) : "None"}
+
+   **Optional:**
+ 
+   ${optionalParams ? optionalParams.map(p => `+ ${p}`) : "None"}
+
+
 
 * **Success Response:**
   
-  <_What should the status code be on success and is there any returned data? This is useful when people need to to know what their callbacks should expect!_>
+  ${successResponse.description}
 
-  * **Code:** 200 <br />
-    **Content:** `{ id : 12 }`
+  * **Code:** ${successResponse.statusCode} <br />
+    **Content:** \`${JSON.stringify(successResponse.response, null, 4)}\`
  
 * **Error Response:**
 
-  <_Most endpoints will have many ways they can fail. From unauthorized access, to wrongful parameters etc. All of those should be liste d here. It might seem repetitive, but it helps prevent assumptions from being made where they should be._>
+  ${errorResponse.description}
 
-  * **Code:** 401 UNAUTHORIZED <br />
-    **Content:** `{ error : "Log in" }`
+  * **Code:** ${errorResponse.statusCode} <br />
+    **Content:** \`${JSON.stringify(errorResponse.response, null, 4)}\`
+`;
 
-  OR
+export type CreateDocsParams = Array<TemplateParams<any>>;
+const createDocs = (params: CreateDocsParams) => {
+  const markdown = params.map(p => template(p));
+  const aggregateDocs = markdown.reduce(
+    (acc, cur) => acc.concat("\n\n" + cur),
+    ""
+  );
+  fs.writeFileSync("./test.md", aggregateDocs, { encoding: "utf-8" });
+};
 
-  * **Code:** 422 UNPROCESSABLE ENTRY <br />
-    **Content:** `{ error : "Email Invalid" }`
-
-* **Sample Call:**
-
-  <_Just a sample call to your endpoint in a runnable format ($.ajax call or a curl request) - this makes life easier and more predictable._> 
-
-* **Notes:**
-
-  <_This is where all uncertainties, commentary, discussion etc. can go. I recommend timestamping and identifying oneself when leaving comments here._> 
-`
+createDocs(docParams);
