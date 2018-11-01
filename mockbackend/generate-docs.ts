@@ -1,5 +1,5 @@
 import fs from "fs";
-import { docParams } from "./docparams";
+import docParams from "./docparams";
 interface HeaderWithDesc {
   header?: string;
   description?: string;
@@ -30,6 +30,9 @@ export interface TemplateParams<D> {
   successResponse: SuccessResponse;
   errorResponse: ErrorResposne;
 }
+
+const reduceListTpl = <T>(arr: T[]) =>
+  arr.reduce((acc, cur) => acc.concat(`- ${JSON.stringify(cur)}\n`), "\n");
 const template = <D>({
   dataParams,
   method,
@@ -55,17 +58,19 @@ const template = <D>({
   
 *  **URL Params**
 
-   ${urlParams ? urlParams.map(p => `+ ${p}`) : "None"}
+   ${urlParams ? reduceListTpl(urlParams) : "None"}
 
 * **Data Params**
 
-   \`${JSON.stringify(dataParams, null, 4)}\`
+\`\`\`js
+${JSON.stringify(dataParams, null, 4)}
+\`\`\`
 
-   **Required:**
+**Required:**
  
-  ${requiredParams ? requiredParams.map(p => `+ ${p}`) : "None"}
+  ${requiredParams ? reduceListTpl(requiredParams) : "None"}
 
-   **Optional:**
+**Optional:**
  
    ${optionalParams ? optionalParams.map(p => `+ ${p}`) : "None"}
 
@@ -77,9 +82,9 @@ const template = <D>({
 
   * **Code:** ${successResponse.statusCode} <br />
     **Content:**
-    \`\`\`js
-    ${JSON.stringify(successResponse.response, null, 4)}
-    \`\`\`
+\`\`\`js
+${JSON.stringify(successResponse.response, null, 4)}
+\`\`\`    
  
 * **Error Response:**
 
@@ -87,9 +92,9 @@ const template = <D>({
 
   * **Code:** ${errorResponse.statusCode} <br />
     **Content:** 
-    \`\`\`js
-    ${JSON.stringify(errorResponse.response, null, 4)}
-    \`\`\`
+\`\`\`js
+${JSON.stringify(errorResponse.response, null, 4)}
+\`\`\`
 `;
 
 export type CreateDocsParams = Array<TemplateParams<any>>;

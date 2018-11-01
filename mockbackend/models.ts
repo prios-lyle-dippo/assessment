@@ -15,6 +15,7 @@ export interface Todo {
 }
 
 export const todoCreateDecoder: Decoder<Partial<Todo>> = object({
+  id: optional(string()),
   title: string(),
   author: string(),
   completed: optional(boolean())
@@ -34,6 +35,7 @@ export interface Author {
 }
 
 export const authorCreateDecoder: Decoder<Partial<Author>> = object({
+  id: optional(string()),
   name: string(),
   jobTitler: optional(string()),
   todos: optional(array(string()))

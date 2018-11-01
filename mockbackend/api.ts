@@ -44,7 +44,7 @@ const generateCRUD: GenerateCrud = (
   create: item => {
     const result = createDecoder.run(item);
     if (result.ok) {
-      collection.insertOne(result);
+      collection.insertOne(result.result);
       return { message: "Created successfully", data: result.result };
     } else {
       return { message: "Could not create", error: result.error };
@@ -55,7 +55,7 @@ const generateCRUD: GenerateCrud = (
     if (result.ok) {
       collection.updateWhere(
         data => data.id === id,
-        found => Object.assign({}, found, result)
+        found => Object.assign({}, found, result.result)
       );
       return { message: "Updated Successfully", data: result.result };
     } else {
