@@ -4,7 +4,7 @@ Connect to [socket.io](https://socket.io/) client;
 
 The websocket implementation mirrors the REST implementation in terms of payload typings.
 
-To push entity creation / updates use the convention
+To push entity creation / updates use the following convention
 
 ## CAUTION: WS WILL NOT VALIDATE SCHEMA TYPE
 
