@@ -37,13 +37,13 @@ export interface Author {
 export const authorCreateDecoder: Decoder<Partial<Author>> = object({
   id: optional(string()),
   name: string(),
-  jobTitler: optional(string()),
+  jobTitle: optional(string()),
   todos: optional(array(string()))
 });
 
 export const authorUpdateDecoder: Decoder<Author> = object({
   id: string(),
   name: string(),
-  jobTitler: optional(string()),
+  jobTitle: optional(string()),
   todos: optional(array(string()))
 });

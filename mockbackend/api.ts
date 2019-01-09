@@ -5,20 +5,22 @@ import {
   todoCreateDecoder,
   todoUpdateDecoder,
   authorCreateDecoder,
-  authorUpdateDecoder
+  authorUpdateDecoder,
+  Author,
+  Todo
 } from "./models";
 import { Decoder } from "@mojotech/json-type-validation";
 
 const db = new Loki("./db.json");
-export const authorCollection = db.addCollection("authors");
-export const todosCollection = db.addCollection("todos");
+export const authorCollection: Collection<Author> = db.addCollection("authors");
+export const todosCollection: Collection<Todo> = db.addCollection("todos");
 todosCollection.on("insert", data => {
   const authorId = data.author;
   authorCollection.updateWhere(
     author => author.id === authorId,
     author => ({
       ...author,
-      todos: author.todos.concat(data.id)
+      todos: (author.todos! || []).concat(data.id)
     })
   );
 });
@@ -31,11 +33,12 @@ interface CrudMethods<T> {
   ): { message: string; data?: any; error?: any };
   delete(id: string): { message: string; data?: any; error?: any };
 }
-type GenerateCrud = <T>(
-  collection: Collection,
+type GenerateCrud = <T extends { id: string }>(
+  collection: Collection<T>,
   createDecoder: Decoder<Partial<T>>,
   updateDecoder: Decoder<T>
 ) => CrudMethods<T>;
+
 const generateCRUD: GenerateCrud = (
   collection,
   createDecoder,
@@ -44,7 +47,7 @@ const generateCRUD: GenerateCrud = (
   create: item => {
     const result = createDecoder.run(item);
     if (result.ok) {
-      collection.insertOne(result.result);
+      collection.insertOne(result.result as any);
       return { message: "Created successfully", data: result.result };
     } else {
       return { message: "Could not create", error: result.error };
