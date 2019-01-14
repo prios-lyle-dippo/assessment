@@ -31,7 +31,7 @@ const mockTodo = ()=> {
 };
 
 const getManyAuthors = (n: number) =>
-  Array.apply(null, Array(n)).map(item => mockAuthor);
+  Array.apply(null, Array(n)).map(item => mockAuthor());
 const getManyTodos = (n: number) => Array.apply(null, Array(n)).map(mockTodo);
 export const seedDb = () => {
   getManyAuthors(5);

@@ -5,12 +5,14 @@ import { todoRouter, todoSockets, authorRouter, authorSockets } from "./api";
 import ioClient from "socket.io";
 import path from "path";
 import bodyParser from "body-parser";
+import cors from 'cors';
 const app = express();
 const port = 3000;
 const server = http.createServer(app);
 const io = ioClient(server);
 
 seedDb();
+app.use(cors());
 app.use(bodyParser.json());
 app.use("/todos", todoRouter);
 app.use("/authors", authorRouter);
