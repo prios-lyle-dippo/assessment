@@ -12,7 +12,7 @@
     "@types/socket.io": "1.4.38",
     "@types/uws": "0.13.2",
     "body-parser": "1.18.3",
-    "express": "4.16.4",
+    "express": "4.17.3",
     "faker": "4.1.0",
     "io": "1.0.0",
     "lokijs": "1.5.5",
